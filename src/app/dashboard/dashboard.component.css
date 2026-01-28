@@ -1,0 +1,11 @@
+/* Make dashboard card titles clearly visible */
+.card .card-header .card-title,
+.card .card-header .card-category {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Remove faded effect on colored headers */
+.card .card-header {
+  opacity: 1 !important;
+}

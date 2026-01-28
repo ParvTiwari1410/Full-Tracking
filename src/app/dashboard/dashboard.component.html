@@ -1,0 +1,74 @@
+<div class="main-content">
+  <div class="container-fluid">
+
+    <!-- Top Stats -->
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-6" *ngFor="let s of stats">
+        <div class="card card-stats">
+          <div class="card-header" [ngClass]="s.color">
+            <div class="card-icon">
+              <i class="material-icons">{{ s.icon }}</i>
+            </div>
+            <p class="card-category">{{ s.label }}</p>
+            <h3 class="card-title">{{ s.value }}</h3>
+          </div>
+          <div class="card-footer">
+            <div class="stats">
+              <i class="material-icons">update</i> {{ s.note }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Trips -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Recent Trips</h4>
+            <p class="card-category">Last vehicle movements</p>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Distance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of trips">
+                  <td>{{ t.vehicle }}</td>
+                  <td>{{ t.from }}</td>
+                  <td>{{ t.to }}</td>
+                  <td>{{ t.distance }} km</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Recent Alerts</h4>
+            <p class="card-category">System notifications</p>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              <li class="list-group-item" *ngFor="let a of alerts">
+                {{ a }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

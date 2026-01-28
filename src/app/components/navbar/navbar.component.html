@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top">
+  <div class="container-fluid">
+
+    <!-- Left: Page title -->
+    <div class="navbar-wrapper">
+     <a class="navbar-brand" href="javascript:void(0)">
+  <!-- Empty on Trips page -->
+</a>
+
+    </div>
+
+    <!-- Mobile toggle -->
+    <button mat-raised-button
+            class="navbar-toggler"
+            type="button"
+            (click)="sidebarToggle()">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="navbar-toggler-icon icon-bar"></span>
+      <span class="navbar-toggler-icon icon-bar"></span>
+      <span class="navbar-toggler-icon icon-bar"></span>
+    </button>
+
+    <!-- Right icons -->
+    <div class="collapse navbar-collapse justify-content-end" id="navigation">
+      <ul class="navbar-nav">
+
+        <!-- Dashboard icon -->
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)">
+            <i class="material-icons">dashboard</i>
+          </a>
+        </li>
+
+        <!-- Notifications -->
+        <li class="nav-item dropdown">
+          <a class="nav-link" href="javascript:void(0)" data-toggle="dropdown">
+            <i class="material-icons">notifications</i>
+            <span class="notification">5</span>
+          </a>
+
+          <div class="dropdown-menu dropdown-menu-right">
+            <a class="dropdown-item" href="javascript:void(0)">System alert</a>
+            <a class="dropdown-item" href="javascript:void(0)">Overspeed detected</a>
+            <a class="dropdown-item" href="javascript:void(0)">Geofence exit</a>
+          </div>
+        </li>
+
+        <!-- User -->
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)">
+            <i class="material-icons">person</i>
+          </a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>

@@ -1,0 +1,42 @@
+<div class="map-page">
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <input
+      type="text"
+      placeholder="Enter vehicle number"
+      [(ngModel)]="searchVehicleNo"
+    />
+    <button (click)="searchVehicle()">Search</button>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Google Map -->
+  <div class="map-container" [class.hidden]="!showMap">
+    <google-map
+      height="100%"
+      width="100%"
+      [center]="center"
+      [zoom]="zoom">
+
+      <map-marker
+        *ngIf="markerPosition"
+        [position]="markerPosition">
+      </map-marker>
+
+    </google-map>
+  </div>
+
+  <!-- Speed Info -->
+  <div class="speed-box" *ngIf="showMap">
+    <span class="label">Current Speed:</span>
+    <span class="value">
+      {{ currentSpeed }} km/h
+    </span>
+  </div>
+
+</div>

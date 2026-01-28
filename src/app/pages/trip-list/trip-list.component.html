@@ -1,0 +1,78 @@
+<div class="card">
+  <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
+    <h4 class="card-title mb-0">Daily Trips</h4>
+
+    <div class="input-group" style="width:300px">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Enter vehicle no..."
+        [(ngModel)]="searchText"
+      >
+      <button class="btn btn-white" (click)="search()">
+        <i class="material-icons">search</i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Vehicle</th>
+          <th>Date</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Distance</th>
+          <th>Avg Speed</th>
+          <th>Stoppages</th>
+          <th>Long Stoppages</th>
+          <th>Report</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let t of filteredTrips">
+          <td>{{t.rc_no}}</td>
+          <td>{{t.trip_date}}</td>
+          <td>{{t.start_time}}</td>
+          <td>{{t.end_time}}</td>
+          <td>{{t.total_distance_km}}</td>
+          <td>{{t.avg_speed}}</td>
+          <td>{{t.stoppages}}</td>
+          <td>{{t.longStoppages}}</td>
+          <td>
+            <button
+              *ngIf="t.longStoppages > 0"
+              class="btn btn-sm btn-danger"
+              (click)="generateReport(t)">
+              Generate
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredTrips.length === 0">
+          <td colspan="9" class="text-center text-muted">
+            No vehicle found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-backdrop" *ngIf="selectedReport"></div>
+
+<div class="report-modal" *ngIf="selectedReport">
+  <h4>Driver Stoppage Report</h4>
+
+  <p><b>Vehicle:</b> {{selectedReport.rc_no}}</p>
+  <p><b>Driver:</b> {{selectedReport.driver}}</p>
+  <p><b>No. of long stoppages:</b> {{selectedReport.longStoppages}}</p>
+  <p><b>Reason:</b> {{selectedReport.reason}}</p>
+
+  <button class="btn btn-secondary" (click)="closeReport()">
+    Close
+  </button>
+</div>

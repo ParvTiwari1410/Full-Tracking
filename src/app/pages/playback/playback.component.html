@@ -1,0 +1,108 @@
+<div class="playback-container">
+
+  <!-- ===============================
+       TOP BAR
+  =============================== -->
+  <div class="top-bar">
+    <input
+      class="input-field"
+      placeholder="Vehicle ID"
+      [(ngModel)]="vehicleId"
+    />
+
+    <input
+      class="input-field"
+      type="datetime-local"
+      [(ngModel)]="fromTime"
+    />
+
+    <input
+      class="input-field"
+      type="datetime-local"
+      [(ngModel)]="toTime"
+    />
+
+    <button class="btn-search" (click)="loadPlayback()">
+      Search
+    </button>
+  </div>
+
+  <!-- ===============================
+       TRIP SUMMARY
+  =============================== -->
+  <div class="trip-summary" *ngIf="tripSummary">
+    <div class="summary-item">
+      🚚 <b>Vehicle:</b> {{ tripSummary.vehicleId }}
+    </div>
+
+    <div class="summary-item">
+      👤 <b>Driver:</b> {{ tripSummary.driverName }}
+    </div>
+
+    <div class="summary-item">
+      🕒 <b>Start:</b>
+      {{ tripSummary.startTime | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+
+    <div class="summary-item">
+      🕔 <b>End:</b>
+      {{ tripSummary.endTime | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+
+    <div class="summary-item">
+      ⏱ <b>Duration:</b> {{ tripSummary.durationMinutes }} min
+    </div>
+
+    <div class="summary-item">
+      🚗 <b>Avg Speed:</b> {{ tripSummary.avgSpeed }} km/h
+    </div>
+
+    <div class="summary-item">
+      ⚡ <b>Max Speed:</b> {{ tripSummary.maxSpeed }} km/h
+    </div>
+  </div>
+
+  <!-- ===============================
+       CONTROL BAR
+  =============================== -->
+  <div class="control-bar">
+    <button class="btn-control" (click)="reverse()">⏪</button>
+    <button class="btn-control" (click)="play()">▶</button>
+    <button class="btn-control" (click)="pause()">⏸</button>
+    <button class="btn-control" (click)="forward()">⏩</button>
+
+    <input
+      class="input-time"
+      type="time"
+      (change)="jumpTo($event)"
+    />
+
+    <span class="current-time">
+      ⏱ {{ currentPlaybackTime }}
+    </span>
+  </div>
+
+  <!-- ===============================
+       MAP
+  =============================== -->
+  <div class="map-container">
+    <google-map
+      height="500px"
+      width="100%"
+      [center]="center"
+      [zoom]="zoom"
+    >
+      <map-polyline
+        *ngIf="path.length"
+        [path]="path"
+        [options]="polylineOptions">
+      </map-polyline>
+
+      <map-marker
+        *ngIf="currentPosition"
+        [position]="currentPosition">
+      </map-marker>
+    </google-map>
+  </div>
+
+</div>

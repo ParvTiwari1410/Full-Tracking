@@ -1,0 +1,46 @@
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <div class="login-header">
+      <h3>Fleet Admin</h3>
+      <p>Vehicle Tracking System</p>
+    </div>
+
+    <form>
+      <div class="form-group">
+        <label>Email</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          placeholder="admin@fleet.com"
+          [(ngModel)]="email"
+          name="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          placeholder="••••••••"
+          [(ngModel)]="password"
+          name="password"
+        >
+      </div>
+
+      <button 
+        type="button" 
+        class="btn btn-primary btn-block"
+        (click)="login()"
+      >
+        Login
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <small>© 2026 Fleet Admin</small>
+    </div>
+
+  </div>
+</div>
