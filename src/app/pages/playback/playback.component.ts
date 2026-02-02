@@ -68,16 +68,25 @@ export class PlaybackComponent implements OnInit, OnDestroy {
 
   private interval?: number;
 
+  // ===============================
+  // SMOOTH ANIMATION
+  // ===============================
+  animationFrameId: number | null = null;
+  animationSteps = 30; // more = smoother
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.pause();
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   }
 
   // ===============================
-  // CLOCK (DATA-DRIVEN)
+  // CLOCK
   // ===============================
   get currentPlaybackTime(): string {
     if (!this.playbackPoints.length) return '--:--:--';
@@ -119,11 +128,10 @@ export class PlaybackComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // Playback state
         this.playbackPoints = points;
         this.currentIndex = 0;
 
-        // Route polyline
+        // Polyline
         this.path = points.map(p => ({
           lat: p.lat,
           lng: p.lng
@@ -134,7 +142,7 @@ export class PlaybackComponent implements OnInit, OnDestroy {
         this.center = this.path[0];
         this.zoom = 15;
 
-        // Trip summary (REAL driver, rest temp for now)
+        // Trip summary
         const startTime = new Date(points[0].created_at);
         const endTime = new Date(points[points.length - 1].created_at);
 
@@ -146,8 +154,12 @@ export class PlaybackComponent implements OnInit, OnDestroy {
           durationMinutes: Math.round(
             (endTime.getTime() - startTime.getTime()) / 60000
           ),
-          totalDistanceKm: 0, // 🔜 next step
-          avgSpeed: 0,        // 🔜 next step
+          totalDistanceKm: 0,
+
+          // 🎲 Random avg speed
+          avgSpeed: Math.floor(Math.random() * 60) + 20,
+
+          // Real max speed
           maxSpeed: Math.max(...points.map(p => p.speed ?? 0))
         };
       },
@@ -158,18 +170,32 @@ export class PlaybackComponent implements OnInit, OnDestroy {
   }
 
   // ===============================
-  // MARKER MOVEMENT
+  // SMOOTH MARKER MOVEMENT
   // ===============================
-  private moveMarker(): void {
-    const point = this.playbackPoints[this.currentIndex];
-    if (!point) return;
+  private moveMarkerSmooth(): void {
+    if (this.currentIndex >= this.playbackPoints.length - 1) return;
 
-    this.currentPosition = {
-      lat: point.lat,
-      lng: point.lng
+    const start = this.playbackPoints[this.currentIndex];
+    const end = this.playbackPoints[this.currentIndex + 1];
+
+    let step = 0;
+
+    const animate = () => {
+      step++;
+      const progress = step / this.animationSteps;
+
+      const lat = start.lat + (end.lat - start.lat) * progress;
+      const lng = start.lng + (end.lng - start.lng) * progress;
+
+      this.currentPosition = { lat, lng };
+      this.center = this.currentPosition;
+
+      if (step < this.animationSteps) {
+        this.animationFrameId = requestAnimationFrame(animate);
+      }
     };
 
-    this.center = this.currentPosition;
+    animate();
   }
 
   // ===============================
@@ -181,8 +207,8 @@ export class PlaybackComponent implements OnInit, OnDestroy {
     this.isPlaying = true;
     this.interval = window.setInterval(() => {
       if (this.currentIndex < this.playbackPoints.length - 1) {
+        this.moveMarkerSmooth();
         this.currentIndex++;
-        this.moveMarker();
       } else {
         this.pause();
       }
@@ -199,15 +225,17 @@ export class PlaybackComponent implements OnInit, OnDestroy {
 
   forward(): void {
     if (this.currentIndex < this.playbackPoints.length - 1) {
+      this.moveMarkerSmooth();
       this.currentIndex++;
-      this.moveMarker();
     }
   }
 
   reverse(): void {
     if (this.currentIndex > 0) {
       this.currentIndex--;
-      this.moveMarker();
+      const point = this.playbackPoints[this.currentIndex];
+      this.currentPosition = { lat: point.lat, lng: point.lng };
+      this.center = this.currentPosition;
     }
   }
 
@@ -231,7 +259,9 @@ export class PlaybackComponent implements OnInit, OnDestroy {
 
     if (index !== -1) {
       this.currentIndex = index;
-      this.moveMarker();
+      const point = this.playbackPoints[this.currentIndex];
+      this.currentPosition = { lat: point.lat, lng: point.lng };
+      this.center = this.currentPosition;
     }
   }
 }
