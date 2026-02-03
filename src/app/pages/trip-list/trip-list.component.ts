@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { API_URL } from '../../services/api.config';
+
 
 @Component({
   selector: 'app-trip-list',
@@ -34,7 +36,7 @@ export class TripListComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>('http://localhost:3000/api/trips')
+    this.http.get<any[]>(`${API_URL}/trips`)
       .subscribe(data => {
 
         this.trips = data.map(t => {

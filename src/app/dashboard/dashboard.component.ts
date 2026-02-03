@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { API_URL } from '../services/api.config';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -19,7 +19,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboard() {
-    this.http.get<any[]>('http://localhost:3000/api/vehicles')
+    this.http.get<any[]>(`${API_URL}/vehicles`)
       .subscribe(data => {
 
         const total = data.length;

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { API_URL } from '../services/api.config';
 
 interface Vehicle {
   rc_no: string;
@@ -7,8 +8,7 @@ interface Vehicle {
   status: string;
   latitude: number;
   longitude: number;
-  formatted_date: string;
-  formatted_time: string;
+  last_updated: string;
   lastSeen?: string;
 }
 
@@ -28,14 +28,12 @@ export class TableListComponent implements OnInit {
   }
 
   loadVehicles() {
-    this.http.get<any[]>('http://localhost:3000/api/vehicles')
-
+    this.http.get<Vehicle[]>(`${API_URL}/vehicles`)
       .subscribe(data => {
         this.vehicles = data.map(v => ({
-  ...v,
-  lastSeen: `${v.formatted_date.replace(/_/g,'-')} ${v.formatted_time}`
-}));
-
+          ...v,
+          lastSeen: v.last_updated   // ✅ correct field
+        }));
       });
   }
 }

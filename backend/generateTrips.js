@@ -1,11 +1,4 @@
-const mysql = require('mysql2/promise');
-
-const dbConfig = {
-  host: 'localhost',
-  user: 'fleetuser',
-  password: 'Fleet@1234',
-  database: 'TRACKING'
-};
+const { connectDB, getDB } = require('./db');
 
 // Haversine formula
 function distanceKm(lat1, lon1, lat2, lon2) {
@@ -21,7 +14,8 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 }
 
 async function generateTrips(date) {
-  const db = await mysql.createConnection(dbConfig);
+  await connectDB();
+  const db = getDB();
 
   const [vehicles] = await db.execute(`
     SELECT DISTINCT rc_no FROM vehicles
@@ -37,7 +31,6 @@ async function generateTrips(date) {
     `, [rc, date]);
 
     console.log("Processing", rc, "points:", points.length);
-
     if (points.length < 1) continue;
 
     let totalDist = 0;
@@ -65,7 +58,7 @@ async function generateTrips(date) {
         movingCount++;
 
         if (stopStart) {
-          const diff = 1;
+          const diff = 1; // minutes
           if (diff >= 10) {
             stoppages.push({
               from: stopStart,
@@ -119,10 +112,8 @@ async function generateTrips(date) {
 
     console.log("Trip generated:", rc);
   }
-
-  db.end();
 }
 
-/* ✅ CORRECT DATE (NO UTC, NO UNDERSCORE) */
+/* Run */
 const today = new Date().toISOString().slice(0, 10);
 generateTrips(today);

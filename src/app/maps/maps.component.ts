@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { API_URL } from '../services/api.config';
 @Component({
   selector: 'app-maps',
   templateUrl: './maps.component.html',
@@ -29,7 +29,7 @@ export class MapsComponent implements OnInit {
   }
 
   fetchVehicles() {
-    this.http.get<any[]>('http://localhost:3000/api/vehicles')
+    this.http.get<any[]>(`${API_URL}/vehicles`)
       .subscribe({
         next: data => this.vehicles = data,
         error: err => console.error(err)

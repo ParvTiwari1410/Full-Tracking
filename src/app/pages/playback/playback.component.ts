@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { PlaybackService } from './playback.service';
 
 interface PlaybackPoint {
   lat: number;
@@ -72,9 +72,9 @@ export class PlaybackComponent implements OnInit, OnDestroy {
   // SMOOTH ANIMATION
   // ===============================
   animationFrameId: number | null = null;
-  animationSteps = 30; // more = smoother
+  animationSteps = 30;
 
-  constructor(private http: HttpClient) {}
+  constructor(private playbackService: PlaybackService) {}
 
   ngOnInit(): void {}
 
@@ -113,60 +113,52 @@ export class PlaybackComponent implements OnInit, OnDestroy {
     this.rangeStart = new Date(this.fromTime);
     this.rangeEnd = new Date(this.toTime);
 
-    const url =
-      `http://localhost:3000/api/playback` +
-      `?vehicleId=${this.vehicleId}` +
-      `&from=${this.fromTime}` +
-      `&to=${this.toTime}`;
+    this.playbackService
+      .getPlayback(this.vehicleId, this.fromTime, this.toTime)
+      .subscribe({
+        next: (res: PlaybackResponse) => {
+          const points = res.points;
 
-    this.http.get<PlaybackResponse>(url).subscribe({
-      next: (res) => {
-        const points = res.points;
+          if (!points || points.length === 0) {
+            alert('No playback data found for selected range');
+            return;
+          }
 
-        if (!points || points.length === 0) {
-          alert('No playback data found for selected range');
-          return;
+          this.playbackPoints = points;
+          this.currentIndex = 0;
+
+          // Polyline
+          this.path = points.map(p => ({
+            lat: p.lat,
+            lng: p.lng
+          }));
+
+          // Initial marker
+          this.currentPosition = this.path[0];
+          this.center = this.path[0];
+          this.zoom = 15;
+
+          // Trip summary
+          const startTime = new Date(points[0].created_at);
+          const endTime = new Date(points[points.length - 1].created_at);
+
+          this.tripSummary = {
+            vehicleId: res.vehicle.id,
+            driverName: res.vehicle.driverName,
+            startTime,
+            endTime,
+            durationMinutes: Math.round(
+              (endTime.getTime() - startTime.getTime()) / 60000
+            ),
+            totalDistanceKm: 0, // (we'll compute later)
+            avgSpeed: Math.floor(Math.random() * 60) + 20,
+            maxSpeed: Math.max(...points.map(p => p.speed ?? 0))
+          };
+        },
+        error: () => {
+          alert('Failed to load playback data');
         }
-
-        this.playbackPoints = points;
-        this.currentIndex = 0;
-
-        // Polyline
-        this.path = points.map(p => ({
-          lat: p.lat,
-          lng: p.lng
-        }));
-
-        // Initial marker
-        this.currentPosition = this.path[0];
-        this.center = this.path[0];
-        this.zoom = 15;
-
-        // Trip summary
-        const startTime = new Date(points[0].created_at);
-        const endTime = new Date(points[points.length - 1].created_at);
-
-        this.tripSummary = {
-          vehicleId: res.vehicle.id,
-          driverName: res.vehicle.driverName,
-          startTime,
-          endTime,
-          durationMinutes: Math.round(
-            (endTime.getTime() - startTime.getTime()) / 60000
-          ),
-          totalDistanceKm: 0,
-
-          // 🎲 Random avg speed
-          avgSpeed: Math.floor(Math.random() * 60) + 20,
-
-          // Real max speed
-          maxSpeed: Math.max(...points.map(p => p.speed ?? 0))
-        };
-      },
-      error: () => {
-        alert('Failed to load playback data');
-      }
-    });
+      });
   }
 
   // ===============================
