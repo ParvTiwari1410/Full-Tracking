@@ -42,7 +42,9 @@
                     <td>{{ v.speed }}</td>
                     <td>{{ v.latitude }}</td>
                     <td>{{ v.longitude }}</td>
-                    <td>{{ v.lastSeen }}</td>
+
+                    <!-- ✅ FIXED LINE -->
+                    <td>{{ v.last_updated | date:'dd MMM yyyy, HH:mm:ss' }}</td>
                   </tr>
                 </tbody>
               </table>

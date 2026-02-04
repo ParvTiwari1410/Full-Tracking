@@ -1,45 +1,66 @@
 function parsePacket(rawHex) {
-  const buffer = Buffer.from(rawHex, 'hex');
+  const buffer = Buffer.from(rawHex, "hex");
 
-  // 1. Extract IMEI
-  const imei = readImei(buffer);
+  // must be GT06 frame
+  if (
+    !(
+      (buffer[0] === 0x78 && buffer[1] === 0x78) ||
+      (buffer[0] === 0x79 && buffer[1] === 0x79)
+    )
+  ) {
+    return { type: "other" };
+  }
 
-  // 2. Time
-  const year = 2000 + buffer[4];
-  const month = buffer[5];
-  const day = buffer[6];
-  const hour = buffer[7];
-  const min = buffer[8];
-  const sec = buffer[9];
-  const timestamp = new Date(year, month - 1, day, hour, min, sec);
+  const protocol = buffer[3];
 
-  // 3. Latitude & Longitude
-  const lat = buffer.readUInt32BE(11) / (60 * 30000);
-  const lng = buffer.readUInt32BE(15) / (60 * 30000);
+  // ---------- LOGIN ----------
+  if (protocol === 0x01) {
+    const imei = readImei(buffer);
+    return { type: "login", deviceId: imei };
+  }
 
-  // 4. Speed
-  const speed = buffer[19];
+  // ---------- GPS LOCATION ----------
+  // ONLY these protocols contain GPS
+  if (protocol === 0x12 || protocol === 0x1A || protocol === 0x22) {
+    const year = 2000 + buffer[4];
+    const month = buffer[5];
+    const day = buffer[6];
+    const hour = buffer[7];
+    const min = buffer[8];
+    const sec = buffer[9];
+    const timestamp = new Date(year, month - 1, day, hour, min, sec);
 
-  // 5. Heading
-  const union = buffer.readUInt16BE(20);
-  const heading = union & 0x03FF;
+    // GT06 공식 공식 (this is the real one)
+    const lat = buffer.readUInt32BE(11) / (60 * 30000);
+    const lng = buffer.readUInt32BE(15) / (60 * 30000);
 
-  return {
-    deviceId: imei,
-    lat,
-    lng,
-    speed,
-    heading,
-    timestamp
-  };
+    const speed = buffer[19];
+
+    const course = buffer.readUInt16BE(20);
+
+    // sign bits
+    let finalLat = lat;
+    let finalLng = lng;
+
+    if (!(course & 0x0400)) finalLat = -lat; // South
+    if (course & 0x0800) finalLng = -lng;    // West
+
+    return {
+      type: "location",
+      lat: finalLat,
+      lng: finalLng,
+      speed,
+      timestamp
+    };
+  }
+
+  // ---------- EVERYTHING ELSE ----------
+  return { type: "other" };
 }
 
-// IMEI decoder (GT06 specific)
 function readImei(buffer) {
   let b = buffer[4];
-  let imei = "";
-  imei += (b & 0x0F);
-
+  let imei = "" + (b & 0x0F);
   for (let i = 0; i < 7; i++) {
     b = buffer[5 + i];
     imei += ((b & 0xF0) >> 4);
