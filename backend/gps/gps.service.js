@@ -3,7 +3,10 @@ const { getDB } = require("../db");
 async function saveGpsData(data) {
   const db = getDB();
 
-  // 1. Raw logs (playback source of truth)
+  // Ensure timestamp is a JS Date (UTC)
+  const gpsTime = new Date(data.timestamp);
+
+  // 1. Raw logs (USED FOR PLAYBACK)
   await db.execute(
     `INSERT INTO gps_logs 
      (device_id, lat, lng, speed, timestamp)
@@ -13,7 +16,7 @@ async function saveGpsData(data) {
       data.lat,
       data.lng,
       data.speed,
-      data.timestamp   // GPS TIME
+      gpsTime
     ]
   );
 
@@ -27,33 +30,28 @@ async function saveGpsData(data) {
       data.lat,
       data.lng,
       data.speed,
-      data.timestamp
+      gpsTime
     ]
   );
 
-  // 3. Vehicles table (IMPORTANT FIX HERE)
+  // 3. Vehicles table (IMPORTANT FIX)
   await db.execute(
     `INSERT INTO vehicles
      (rc_no, latitude, longitude, speed, status, source, last_updated)
      VALUES (?, ?, ?, ?, 'moving', 'gps', ?)
      ON DUPLICATE KEY UPDATE
-       latitude=?,
-       longitude=?,
-       speed=?,
-       status='moving',
-       source='gps',
-       last_updated=?`,
+       latitude = VALUES(latitude),
+       longitude = VALUES(longitude),
+       speed = VALUES(speed),
+       status = 'moving',
+       source = 'gps',
+       last_updated = VALUES(last_updated)`,
     [
       data.deviceId,
       data.lat,
       data.lng,
       data.speed,
-      data.timestamp,   // <-- GPS TIME
-
-      data.lat,
-      data.lng,
-      data.speed,
-      data.timestamp    // <-- GPS TIME
+      gpsTime
     ]
   );
 }
